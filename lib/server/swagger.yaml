@@ -31,6 +31,7 @@ paths:
             default: sgv
         - name: find
           in: query
+          allowReserved: true
           description: |
             The query used to find entries, support nested query syntax, for
             example `find[dateString][$gte]=2015-08-27`.  All find parameters
@@ -40,6 +41,7 @@ paths:
             type: string
         - name: count
           in: query
+          allowReserved: true
           description: Number of entries to return.
           required: false
           schema:
@@ -115,6 +117,7 @@ paths:
             default: .*
         - name: find
           in: query
+          allowReserved: true
           description: |
             The query used to find entries, support nested query syntax, for
             example `find[dateString][$gte]=2015-08-27`.  All find parameters
@@ -124,6 +127,7 @@ paths:
             type: string
         - name: count
           in: query
+          allowReserved: true
           description: Number of entries to return.
           required: false
           schema:
@@ -169,6 +173,7 @@ paths:
             default: sgv
         - name: find
           in: query
+          allowReserved: true
           description: |
             The query used to find entries, support nested query syntax, for
             example `find[dateString][$gte]=2015-08-27`.  All find parameters
@@ -178,6 +183,7 @@ paths:
             type: string
         - name: count
           in: query
+          allowReserved: true
           description: Number of entries to return.
           required: false
           schema:
@@ -221,6 +227,7 @@ paths:
             type: string
         - name: find
           in: query
+          allowReserved: true
           description: >-
             The query used to find entries, support nested query syntax, for
             example `find[dateString][$gte]=2015-08-27`.  All find parameters
@@ -230,6 +237,7 @@ paths:
             type: string
         - name: count
           in: query
+          allowReserved: true
           description: Number of entries to return.
           required: false
           schema:
@@ -279,6 +287,7 @@ paths:
             type: string
         - name: find
           in: query
+          allowReserved: true
           description: >-
             The query used to find entries, support nested query syntax, for
             example `find[dateString][$gte]=2015-08-27`.  All find parameters
@@ -288,6 +297,7 @@ paths:
             type: string
         - name: count
           in: query
+          allowReserved: true
           description: Number of entries to return.
           required: false
           schema:
@@ -314,6 +324,7 @@ paths:
       parameters:
         - name: find
           in: query
+          allowReserved: true
           description: >-
             The query used to find entries, support nested query syntax, for
             example `find[dateString][$gte]=2015-08-27`.  All find parameters
@@ -321,14 +332,13 @@ paths:
           required: false
           schema:
             type: string
-          allowReserved: true
         - name: count
           in: query
+          allowReserved: true
           description: Number of entries to return.
           required: false
           schema:
             type: number
-          allowReserved: true
       tags:
         - Entries
       responses:
@@ -374,6 +384,7 @@ paths:
       parameters:
         - name: find
           in: query
+          allowReserved: true
           description: >-
             The query used to find entries, support nested query syntax, for
             example `find[dateString][$gte]=2015-08-27`.  All find parameters
@@ -383,6 +394,7 @@ paths:
             type: string
         - name: count
           in: query
+          allowReserved: true
           description: Number of entries to return.
           required: false
           schema:
@@ -401,6 +413,7 @@ paths:
       parameters:
         - name: find
           in: query
+          allowReserved: true
           description: >-
             The query used to find entries, supports nested query syntax. 
             Examples `find[insulin][$gte]=3` `find[carb][$gte]=100`
@@ -411,6 +424,7 @@ paths:
             type: string
         - name: count
           in: query
+          allowReserved: true
           description: Number of entries to return.
           required: false
           schema:
@@ -455,6 +469,7 @@ paths:
       parameters:
         - name: find
           in: query
+          allowReserved: true
           description: >-
             The query used to find treatments to delete,
             support nested query syntax, for example `find[insulin][$gte]=3`.
@@ -464,6 +479,7 @@ paths:
             type: string
         - name: count
           in: query
+          allowReserved: true
           description: Number of entries to return.
           required: false
           schema:
@@ -549,6 +565,7 @@ paths:
       parameters:
         - name: find
           in: query
+          allowReserved: true
           description: >-
             The query used to find entries, support nested query syntax, for
             example `find[dateString][$gte]=2015-08-27`.  All find parameters
@@ -558,6 +575,7 @@ paths:
             type: string
         - name: count
           in: query
+          allowReserved: true
           description: Number of devicestatus records to return.
           required: false
           schema:
@@ -603,6 +621,7 @@ paths:
       parameters:
         - name: find
           in: query
+          allowReserved: true
           description: |
             The query used to find entries, support nested query syntax, for
             example `find[created_at][$gte]=2015-08-27`.  All find parameters
