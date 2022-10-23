@@ -321,12 +321,14 @@ paths:
           required: false
           schema:
             type: string
+          allowReserved: true
         - name: count
           in: query
           description: Number of entries to return.
           required: false
           schema:
             type: number
+          allowReserved: true
       tags:
         - Entries
       responses:
