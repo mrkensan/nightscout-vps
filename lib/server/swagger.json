@@ -393,6 +393,7 @@
           {
             "name": "find",
             "in": "query",
+            "allowReserved": true,
             "description": "The query used to find entries, support nested query syntax, for example `find[dateString][$gte]=2015-08-27`.  All find parameters are interpreted as strings.",
             "required": false,
             "schema": {
@@ -402,6 +403,7 @@
           {
             "name": "count",
             "in": "query",
+            "allowReserved": true,
             "description": "Number of entries to return.",
             "required": false,
             "schema": {
