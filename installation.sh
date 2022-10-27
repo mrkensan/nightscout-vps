@@ -1,8 +1,28 @@
 #!/bin/bash
 
 echo
-echo "JamOrHam Nightscout Installer - Designed for Google Compute Minimal Ubuntu 20 micro instance"
+echo "Nightscout Installer - Designed for Google Compute Minimal Ubuntu 20 micro instance"
 echo
+
+DDNS=""
+
+if [ $# -gt 0 ] then
+  while [[ $# -gt 0 ]]; do
+      case "$1" in
+       -d | --DDNS )
+         NO_DDNS="YES"
+         shift 1
+         ;;
+       -h | --help)
+        echo "Usage: install --DDNS    to install DDNS client"
+        exit 2
+        ;;
+      *)
+        shift 1
+        ;;
+    esac
+  done
+fi
 
 
 if [ "`id -u`" != "0" ]
@@ -11,6 +31,7 @@ echo "Script needs root - execute bootstrap.sh or use sudo bash installation.sh"
 echo "Cannot continue.."
 exit 5
 fi
+
 
 if [ ! -s /var/SWAP ]
 then
@@ -21,6 +42,7 @@ mkswap /var/SWAP
 fi
 swapon 2>/dev/null /var/SWAP
 
+
 echo "Installing system basics"
 sudo apt-get update
 sudo apt-get -y install wget gnupg libcurl4 openssl liblzma5
@@ -29,30 +51,35 @@ sudo apt-get -y install vis
 sudo apt-get -y install nano
 sudo apt-get -y install screen
 sudo apt-get -y install net-tools
-sudo apt-get -y install build-essential
-sudo apt-get -y install mongodb-server
 sudo apt-get -y install jq
+sudo apt-get -y install python
 
-# Create mongo user and admin.
+
+# Install Mongodb and user and admin.
+echo "Installing Mongo db"
+
+sudo apt-get -y install mongodb-server
 echo -e "use Nightscout\ndb.createUser({user: \"username\", pwd: \"password\", roles:[\"readWrite\"]})\nquit()" | mongo
 echo -e "use admin\ndb.createUser({ user: \"mongoadmin\" , pwd: \"mongoadmin\", roles: [\"userAdminAnyDatabase\", \"dbAdminAnyDatabase\", \"readWriteAnyDatabase\"]})\nquit()" | mongo
 
 
-sudo apt-get install -y  git python gcc g++ make
+echo "Installing Node js & npm"
 
-echo "Installing Node js"
-
-sudo apt-get install -y nodejs npm
+sudo apt-get -y install nodejs npm
 sudo apt -y autoremove
 cd /tmp
-cd /srv
+
 
 echo "Installing Nightscout"
 
-sudo git clone https://github.com/jamorham/nightscout-vps.git
+cd /srv
+sudo apt-get -y install git
+sudo git clone https://github.com/mrkensan/nightscout-vps.git
 cd nightscout-vps
 sudo git checkout vps-1
 sudo git pull
+
+echo "Setting up npm"
 
 sudo npm install
 sudo npm run generate-keys
@@ -62,74 +89,74 @@ do
 read -t 0.1 dummy
 done
 
-if [ ! -s /usr/local/etc/no-ip2.conf ]
-then
-cd /usr/src
-sudo tar -xzf /srv/nightscout-vps/helper/noip-duc-linux.tar.gz
-cd /usr/src/noip-2.1.9-1
-sudo make install
+
+if [ "$DDNS" = "YES" ] 
+echo "Installing No-IP2 Dynamic DNS client"
+
+    if [ ! -s /usr/local/etc/no-ip2.conf ]
+    then
+        sudo apt-get -y install build-essential gcc g++ make
+        sudo apt-get -y install gcc g++ make
+        cd /usr/src
+        sudo tar -xzf /srv/nightscout-vps/helper/noip-duc-linux.tar.gz
+        cd /usr/src/noip-2.1.9-1
+        sudo make install
+    else
+        echo "Noip client already installed - delete /usr/local/etc/no-ip2.conf if you want to change config"
+    fi
+
+    noip2 -S
+
+    hostname=`noip2 -S 2>&1 | grep host | tr -s ' ' | tr -d '\t' | cut -f2 -d' ' | head -1`
+
+    if [ "$hostname" = "" ]
+    then
+        echo "Could not determine host name - did no ip dynamic dns install fail?"
+        echo "Cannot continue!"
+    exit 5
+    fi
+
+    # execute installer
+    noip2
 else
-echo "Noip client already installed - delete /usr/local/etc/no-ip2.conf if you want to change config"
+    echo "NOT INSTALLING: 'no-ip2' DDNS service"
 fi
-noip2 -S
-
-hostname=`noip2 -S 2>&1 | grep host | tr -s ' ' | tr -d '\t' | cut -f2 -d' ' | head -1`
-
-if [ "$hostname" = "" ]
-then
-echo "Could not determine host name - did no ip dynamic dns install fail?"
-echo "Cannot continue!"
-exit 5
-fi
-
-# execute installer
-noip2
-
 
 sudo apt-get install -y nginx python3-certbot-nginx inetutils-ping
 
 
 if [ "`grep '.well-known' /etc/nginx/sites-enabled/default`" = "" ]
 then
-sudo rm -f /tmp/nginx.conf
-sudo grep -v '^#' /etc/nginx/sites-enabled/default >/tmp/nginx.conf
+    sudo rm -f /tmp/nginx.conf
+    sudo grep -v '^#' /etc/nginx/sites-enabled/default >/tmp/nginx.conf
 
-cat /tmp/nginx.conf | sed -z -e 'sZlocation / {[^}]*}Zlocation /.well-known {\n        try_files $uri $uri/ =404;\n}\n\nlocation / {\nproxy_pass  http://127.0.0.1:1337/;\nproxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\nproxy_set_header X-Forwarded-Proto https;\nproxy_http_version 1.1;\nproxy_set_header Upgrade $http_upgrade;\nproxy_set_header Connection "upgrade";\n}Zg' >/etc/nginx/sites-enabled/default
+    cat /tmp/nginx.conf | sed -z -e 'sZlocation / {[^}]*}Zlocation /.well-known {\n        try_files $uri $uri/ =404;\n}\n\nlocation / {\nproxy_pass  http://127.0.0.1:1337/;\nproxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\nproxy_set_header X-Forwarded-Proto https;\nproxy_http_version 1.1;\nproxy_set_header Upgrade $http_upgrade;\nproxy_set_header Connection "upgrade";\n}Zg' >/etc/nginx/sites-enabled/default
 
-sudo service nginx stop
-
-
+    sudo service nginx stop
 else
-echo "Nginx config already patched"
+    echo "Nginx config already patched"
 fi
 
 sudo service nginx start
 sudo certbot --nginx -d "$hostname" --redirect
 
-
 sudo systemctl daemon-reload
 sudo systemctl start mongodb
-
-
 
 echo
 echo "Setting up startup service"
 echo
 
 cat > /etc/nsconfig << EOF
-
-export API_SECRET="YOUR_API_SECRET_HERE"
+export API_SECRET="123456789012"
 export ENABLE="careportal food boluscalc bwp cob bgi pump openaps rawbg iob upbat cage sage basal"
-export AUTH_DEFAULT_ROLES="denied"
+export AUTH_DEFAULT_ROLES="admin"
 export PUMP_FIELDS="reservoir battery clock"
 export DEVICESTATUS_ADVANCED="true"
 
 EOF
 
-
 cat > /etc/nightscout-start.sh << "EOF"
-
-
 #!/bin/sh
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
@@ -204,7 +231,7 @@ swapon /var/SWAP
 
 service snapd stop
 
-/usr/local/bin/noip2 &
+#/usr/local/bin/noip2 &
 service mongodb start
 
 screen -dmS nightscout sudo -u nobody bash /etc/nightscout-start.sh
@@ -233,6 +260,8 @@ cat > /etc/systemd/system/rc-local.service << "EOF"
  WantedBy=multi-user.target
 
 EOF
+
+
 sudo sed -i -e 'sX//Unattended-Upgrade::Automatic-Reboot "false";XUnattended-Upgrade::Automatic-Reboot "true";Xg' /etc/apt/apt.conf.d/50unattended-upgrades 
 sudo systemctl daemon-reload
 sudo systemctl enable rc-local
