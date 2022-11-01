@@ -7,38 +7,37 @@ echo
 DDNS=""
 
 if [ $# -gt 0 ] then
-  while [[ $# -gt 0 ]]; do
+    while [[ $# -gt 0 ]]; do
       case "$1" in
-       -d | --DDNS )
-         NO_DDNS="YES"
-         shift 1
-         ;;
-       -h | --help)
-        echo "Usage: install --DDNS    to install DDNS client"
-        exit 2
-        ;;
-      *)
-        shift 1
-        ;;
-    esac
-  done
+        -d | --DDNS )
+            NO_DDNS="YES"
+            shift 1
+            ;;
+        -h | --help)
+            echo "Usage: install --DDNS    to install DDNS client"
+            exit 2
+            ;;
+        *)
+            shift 1
+            ;;
+      esac
+    done
 fi
 
 
 if [ "`id -u`" != "0" ]
-then
-echo "Script needs root - execute bootstrap.sh or use sudo bash installation.sh"
-echo "Cannot continue.."
-exit 5
+    then
+    echo "Script needs root - execute bootstrap.sh or use sudo bash installation.sh"
+    echo "Cannot continue.."
+    exit 5
 fi
 
 
-if [ ! -s /var/SWAP ]
-then
-echo "Creating swap partition"
-dd if=/dev/zero of=/var/SWAP bs=1M count=2000
-chmod 600 /var/SWAP
-mkswap /var/SWAP
+if [ ! -s /var/SWAP ] then
+    echo "Creating swap partition"
+    dd if=/dev/zero of=/var/SWAP bs=1M count=2000
+    chmod 600 /var/SWAP
+    mkswap /var/SWAP
 fi
 swapon 2>/dev/null /var/SWAP
 
